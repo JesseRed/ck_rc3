@@ -1,5 +1,5 @@
 function stat = ck_rc3_fill_all_clusters_from_niftifiles(clusterdir,outdir,Vm,Pm,options)
-% Füllt die im Verzeichnis stehenden Clusterstrukturen mit den
+% Fï¿½llt die im Verzeichnis stehenden Clusterstrukturen mit den
 % Daten aus den Files
 
 %options
@@ -81,7 +81,7 @@ for i=1:length(Vm)
             
             if stat ==0
                 stat = 1;
-                fprintf('Fehler bei Cluster nummer %.0f von Proband %s\n',c,Vm{i,1}(1,:));
+                fprintf('Fehler bei Cluster nummer %.0f von Proband %s\n',c,Vm{1,i}(1,:));
             end
             
             % kopieren der Zeitreihe
