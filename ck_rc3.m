@@ -1128,7 +1128,7 @@ end
 
 function file_list = get_full_subjects_filenames(app,path,Items)
     %assignin('base','Items',Items);
-%            length(Items)
+    %            length(Items)
     subdir = app.dataimportsubdirnameEditField.Value;
     filefilter = app.dataimportfilefilterEditField.Value;
     for i=1:length(Items)
@@ -1137,7 +1137,7 @@ function file_list = get_full_subjects_filenames(app,path,Items)
         if ~isempty(subdir)
             tmp = [path filesep Items{i} filesep subdir filesep filefilter];
         end
-%                tmp = [p filefilter];
+    %                tmp = [p filefilter];
         
         files = dir(tmp);
         assignin('base','files',files);
@@ -1147,7 +1147,7 @@ function file_list = get_full_subjects_filenames(app,path,Items)
             file_list{i}(j,1:length(name))=name;
         end
         %file_list{i} = spm_vol(name);
-%                path_list{i}=[path filesep Items{i} filesep subdir];
+    %                path_list{i}=[path filesep Items{i} filesep subdir];
     end
                     
 
@@ -1161,8 +1161,8 @@ function error = test_existence(app,rootdir,pathlist)
     for i=1:length(pathlist)
         
         p = [rootdir filesep pathlist{i} filesep app.dataimportsubdirnameEditField.Value];
-%                pf = Vm{i}(1,1).fname; 
-%                [p,f] = fileparts(pf);
+    %                pf = Vm{i}(1,1).fname; 
+    %                [p,f] = fileparts(pf);
 
         e1 = exist(fullfile(p,app.graymatterfilenameEditField.Value));
         e2 = exist(fullfile(p,app.graymatterfilenameEditField.Value));
@@ -1560,9 +1560,6 @@ end
 %             for i=1:size(R,1); for j=1:size(R,2); for k =1:size(R,3); if R(i,j,k)>1; fprintf(' %.0f  %.0f %.0f %.5f\n',i,j,k,R(i,j,k)); end; end; end; end;
 %         end
 
-function results = func17(app)
-    
-end
 
 function STAT = make_C2C_group_struct2(app,dir,namelist,postfix)
     % postfix definiert die Daten die rausgeschrieben werden Y Yc1, Yc2
@@ -1695,23 +1692,23 @@ function C = reduce(C,idx,num_subjects)
             end
         end
     end
-%             
-%                 C2C_stat_g1.R(:,:,idx)=[]; end
-%             if isfield(C2C_stat_g1,'P'); C2C_stat_g1.P(:,:,idx)=[];  end
-%             if isfield(C2C_stat_g1,'Z'); C2C_stat_g1.Z(:,:,idx)=[]; end
-%             if isfield(C2C_stat_g1,'Syn'); C2C_stat_g1.Syn(:,:,idx)=[]; end
-%             if isfield(C2C_stat_g1,'PLV'); C2C_stat_g1.PLV(:,:,idx)=[]; end
-%             if isfield(C2C_stat_g1,'T'); C2C_stat_g1.T(:,:,:,idx)=[]; end
-%             if isfield(C2C_stat_g1,'Coh'); C2C_stat_g1.Coh(:,:,:,idx)=[]; end
-%             if isfield(C2C_stat_g1,'CohF'); C2C_stat_g1.CohF(:,:,:,idx)=[]; end
-%             if isfield(C2C_stat_g1,'Power'); C2C_stat_g1.Power(:,idx)=[]; end
-%             if isfield(C2C_stat_g1,'Comp'); C2C_stat_g1.Comp(:,idx)=[]; end
-%             if isfield(C2C_stat_g1,'RiN'); C2C_stat_g1.RiN(:,:,idx)=[]; end
-%             if isfield(C2C_stat_g1,'RN'); C2C_stat_g1.RN(:,idx)=[]; end
-%             if isfield(C2C_stat_g1,'ZiN'); C2C_stat_g1.ZiN(:,:,idx)=[]; end
-%             if isfield(C2C_stat_g1,'ZN'); C2C_stat_g1.ZN(:,idx)=[]; end
-%             if isfield(C2C_stat_g1,'namelist'); C2C_stat_g1.namelist = namelist; end
-%             
+            
+            %     C2C_stat_g1.R(:,:,idx)=[]; end
+            % if isfield(C2C_stat_g1,'P'); C2C_stat_g1.P(:,:,idx)=[];  end
+            % if isfield(C2C_stat_g1,'Z'); C2C_stat_g1.Z(:,:,idx)=[]; end
+            % if isfield(C2C_stat_g1,'Syn'); C2C_stat_g1.Syn(:,:,idx)=[]; end
+            % if isfield(C2C_stat_g1,'PLV'); C2C_stat_g1.PLV(:,:,idx)=[]; end
+            % if isfield(C2C_stat_g1,'T'); C2C_stat_g1.T(:,:,:,idx)=[]; end
+            % if isfield(C2C_stat_g1,'Coh'); C2C_stat_g1.Coh(:,:,:,idx)=[]; end
+            % if isfield(C2C_stat_g1,'CohF'); C2C_stat_g1.CohF(:,:,:,idx)=[]; end
+            % if isfield(C2C_stat_g1,'Power'); C2C_stat_g1.Power(:,idx)=[]; end
+            % if isfield(C2C_stat_g1,'Comp'); C2C_stat_g1.Comp(:,idx)=[]; end
+            % if isfield(C2C_stat_g1,'RiN'); C2C_stat_g1.RiN(:,:,idx)=[]; end
+            % if isfield(C2C_stat_g1,'RN'); C2C_stat_g1.RN(:,idx)=[]; end
+            % if isfield(C2C_stat_g1,'ZiN'); C2C_stat_g1.ZiN(:,:,idx)=[]; end
+            % if isfield(C2C_stat_g1,'ZN'); C2C_stat_g1.ZN(:,idx)=[]; end
+            % if isfield(C2C_stat_g1,'namelist'); C2C_stat_g1.namelist = namelist; end
+            
     
 
 
