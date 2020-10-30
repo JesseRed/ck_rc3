@@ -1,5 +1,5 @@
 % Shortcut summary goes here
-SPM_DIR="/opt/spm";
+SPM_DIR="/opt/spm12";
 SB_TOOLS="/opt/sb_tools";
 CK_DIR="/opt/ck_rc3";
 

@@ -227,7 +227,17 @@ function out = ck_rc3(varargin)
             %[filenamesg1, filenamesg2] = get_filenames(handles,'Cluster_');
             %outdir = get(handles.editoutdir,'String');
             
-            
+            % GC SB
+            if str2num(app.sb_gc_switch.Value)
+                sb_cfg = [];
+                sb_cfg.TRIAL_LENGTH = app.sb_gc_TRIAL_LENGTH.Value;
+                sb_pn_results = app.resultsdirEditField.Value;
+                sb_data_dir = {app.g1dirEditField.Value, app.g2dirEditField.Value};
+                ck_rc3_sb_calc_granger(sb_data_dir, sb_pn_results, sb_cfg);
+                % ck_rc3_sb_calc_granger({'/export/nfs_share/BIOMAG_DATA/Projects/TV_Studie_MN/data/processing/RS/RESULTS_7N/A', '/export/nfs_share/BIOMAG_DATA/Projects/TV_Studie_MN/data/processing/RS/RESULTS_7N/B'}, '/export/nfs_share/BIOMAG_DATA/Projects/TV_Studie_MN/data/processing/RS/RESULTS_7N')
+
+
+            end
             
             
             load(fullfile(resultsdir,'parameter.mat'));

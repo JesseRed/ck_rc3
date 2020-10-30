@@ -133,6 +133,10 @@ classdef ck_rc3_GUI < matlab.apps.AppBase
         conuseYCheckBox                 matlab.ui.control.CheckBox
         conuseYc1CheckBox               matlab.ui.control.CheckBox
         conuseYc2CheckBox               matlab.ui.control.CheckBox
+        sbgrangercausalityPanel         matlab.ui.container.Panel
+        triallengthimagesLabel          matlab.ui.control.Label
+        sb_gc_TRIAL_LENGTH              matlab.ui.control.NumericEditField
+        sb_gc_switch                    matlab.ui.control.ToggleSwitch
         datareductionTab                matlab.ui.container.Tab
         deleteifpossiblePanel           matlab.ui.container.Panel
         YCheckBox                       matlab.ui.control.CheckBox
@@ -526,6 +530,16 @@ classdef ck_rc3_GUI < matlab.apps.AppBase
         % Button pushed function: savenewsbButton
         function savenewsbButtonPushed(app, event)
             ck_rc3('save_new', app);
+        end
+
+        % Value changed function: sb_gc_switch
+        function sb_gc_switchValueChanged(app, event)
+            value = str2num(app.sb_gc_switch.Value);
+            if value
+                app.sbgrangercausalityPanel.BackgroundColor = 'green';
+            else
+                app.sbgrangercausalityPanel.BackgroundColor = [0.94 0.94 0.94];
+            end
         end
     end
 
@@ -1299,6 +1313,33 @@ classdef ck_rc3_GUI < matlab.apps.AppBase
             app.conuseYc2CheckBox.Text = 'Yc2';
             app.conuseYc2CheckBox.Position = [22 25 43 15];
             app.conuseYc2CheckBox.Value = true;
+
+            % Create sbgrangercausalityPanel
+            app.sbgrangercausalityPanel = uipanel(app.connectivityestimationTab);
+            app.sbgrangercausalityPanel.Title = 'sb granger causality';
+            app.sbgrangercausalityPanel.Position = [34 500 274 91];
+
+            % Create triallengthimagesLabel
+            app.triallengthimagesLabel = uilabel(app.sbgrangercausalityPanel);
+            app.triallengthimagesLabel.HorizontalAlignment = 'right';
+            app.triallengthimagesLabel.VerticalAlignment = 'top';
+            app.triallengthimagesLabel.Position = [75 36 108 22];
+            app.triallengthimagesLabel.Text = 'trial length(images)';
+
+            % Create sb_gc_TRIAL_LENGTH
+            app.sb_gc_TRIAL_LENGTH = uieditfield(app.sbgrangercausalityPanel, 'numeric');
+            app.sb_gc_TRIAL_LENGTH.Limits = [1 1000];
+            app.sb_gc_TRIAL_LENGTH.Position = [198 39 44 22];
+            app.sb_gc_TRIAL_LENGTH.Value = 60;
+
+            % Create sb_gc_switch
+            app.sb_gc_switch = uiswitch(app.sbgrangercausalityPanel, 'toggle');
+            app.sb_gc_switch.Items = {'0', '1'};
+            app.sb_gc_switch.ValueChangedFcn = createCallbackFcn(app, @sb_gc_switchValueChanged, true);
+            app.sb_gc_switch.FontSize = 8;
+            app.sb_gc_switch.FontColor = [0.9412 0.9412 0.9412];
+            app.sb_gc_switch.Position = [37 16 20 45];
+            app.sb_gc_switch.Value = '0';
 
             % Create datareductionTab
             app.datareductionTab = uitab(app.TabGroup);
