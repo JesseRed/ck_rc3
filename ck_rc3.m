@@ -1,6 +1,6 @@
 % MAIN FUNCTION FOR ck_rc3
 function out = ck_rc3(varargin)
-    VERSION="ck_rc3 v20201030";
+    VERSION="ck_rc3 v20210113";
 
     % PARSE the arguments
     if numel(varargin) <1
@@ -20,7 +20,7 @@ function out = ck_rc3(varargin)
         % case 'TEMPL' %ie: ck_rc3('TEMPL', app);
         case 'start_gui' %ie: ck_rc3('start_gui');
             app = ck_rc3_GUI();
-            app.UIFigure.Name = VERSION;
+            app.ck_rc3_uiUIFigure.Name = VERSION;
 
             [CK_DIR fn ext] = fileparts(which('ck_rc3'));
             addpath(CK_DIR);
@@ -45,13 +45,39 @@ function out = ck_rc3(varargin)
             ck_rc3_visualize_network_clusterbehavior(app.resultsdirEditField.Value,C2C_stat.G);
 
         case 'updatedataimport' %ie: ck_rc3('updatedataimport', app);
-            p1 = app.g1dirdataimportEditField.Value;
-            p2 = app.g2dirdataimportEditField.Value;
-            filter = app.dataimportsubdirnameEditField.Value;
-            listg1 = get_updatedataimport_list(app,p1,filter);
-            listg2 = get_updatedataimport_list(app,p2,filter);
+            data_dir = app.g1dirdataimportEditField.Value;
+            if ~exist(data_dir), warndlg('ungueltiges Verzeichnis!'); return; end
+
+            subdir_1 = app.dataimportsubdirnameEditField_1.Value;
+            subdir_2 = app.dataimportsubdirnameEditField_2.Value;
+            filter_str = app.dataimportfilefilterEditField.Value;
+
+            listg1 = get_updatedataimport_list(data_dir,subdir_1, filter_str);
+            listg2 = get_updatedataimport_list(data_dir,subdir_2, filter_str);
             app.g1dirdataimportListBox.Items = listg1;
             app.g2dirdataimportListBox.Items = listg2;
+
+            %if successfull try to import a meta.json as well
+            if isempty(listg1), return; end
+            fn = fullfile(data_dir, listg1{1}, subdir_1, 'meta.json');
+            if ~exist(fn), fprintf('no valid meta.json found!\n', fn), return, end
+            val = sb_gen_read_jsonfile(fn);
+            if isfield(val, 'options')
+                if isfield(val.options, 'bp_filter_str')
+                    bp_filter = eval(val.options.bp_filter_str);
+                    app.lpfEditField.Value = bp_filter(2);
+                    app.hpfEditField.Value = bp_filter(1);
+                else
+                    disp('no lhp/hpf informatino found, please edit manually!');
+                end
+
+                if isfield(val.options, 'TR')
+                    app.TREditField.Value = val.options.TR;
+                else
+                    disp('no TR information found, please check manually!');
+                end
+
+            end
 
         case 'update' %ie: ck_rc3('update', app);
             stat = listboxupdate(app);
@@ -62,10 +88,11 @@ function out = ck_rc3(varargin)
             %fprintf('testforfilepresencebutton\n');
             %Items = app.g1dirdataimportListBox.Items
             %            Val = app.g1dirdataimportListBox.Value
-            r1 = test_existence(app,app.g1dirdataimportEditField.Value, app.g1dirdataimportListBox.Value);
-            r2 = test_existence(app,app.g2dirdataimportEditField.Value, app.g2dirdataimportListBox.Value);
+            r1 = test_existence(app, app.g1dirdataimportEditField.Value, app.g1dirdataimportListBox.Items, app.dataimportsubdirnameEditField_1.Value);
+            r2 = test_existence(app, app.g1dirdataimportEditField.Value, app.g2dirdataimportListBox.Items, app.dataimportsubdirnameEditField_2.Value);
             
-            if (r1+r2)==0
+
+            if (r1)==0
                 app.Lamp.Color='green';
                 
             else
@@ -228,36 +255,31 @@ function out = ck_rc3(varargin)
             %outdir = get(handles.editoutdir,'String');
             
             % GC SB
-            if str2num(app.sb_gc_switch.Value)
+            if app.sb_gc_switch.Value
                 sb_cfg = [];
                 sb_cfg.TRIAL_LENGTH = app.sb_gc_TRIAL_LENGTH.Value;
                 sb_pn_results = app.resultsdirEditField.Value;
                 sb_data_dir = {app.g1dirEditField.Value, app.g2dirEditField.Value};
                 ck_rc3_sb_calc_granger(sb_data_dir, sb_pn_results, sb_cfg);
                 % ck_rc3_sb_calc_granger({'/export/nfs_share/BIOMAG_DATA/Projects/TV_Studie_MN/data/processing/RS/RESULTS_7N/A', '/export/nfs_share/BIOMAG_DATA/Projects/TV_Studie_MN/data/processing/RS/RESULTS_7N/B'}, '/export/nfs_share/BIOMAG_DATA/Projects/TV_Studie_MN/data/processing/RS/RESULTS_7N')
-
-
             end
             
             
             load(fullfile(resultsdir,'parameter.mat'));
             
-            
-            
-            
             %options = ck_rc2_estimate_connectivity_options();
             
-            
+
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %  erstelle die zu uebergebende options struct
             options.parameter = parameter;
             options.cancel = 0;
-            options.EstimateCorrelations = str2num(app.correlationSwitch.Value);
-            options.EstimateCoherence = str2num(app.coherenceSwitch.Value);
-            options.EstimatePartialCoherence = str2num(app.partialcoherenceSwitch.Value);
-            options.EstimateTransinformation = str2num(app.transinformationSwitch.Value);
-            options.EstimateSynchronization = str2num(app.synchronizationSwitch.Value);
-            options.EstimateComplexity = str2num(app.complexitySwitch.Value);
+            options.EstimateCorrelations = app.correlationSwitch.Value;
+            options.EstimateCoherence = app.coherenceSwitch.Value;
+            options.EstimatePartialCoherence = app.partialcoherenceSwitch.Value;
+            options.EstimateTransinformation = app.transinformationSwitch.Value;
+            options.EstimateSynchronization = app.synchronizationSwitch.Value;
+            options.EstimateComplexity = app.complexitySwitch.Value;
             options.Transinformation_bins = app.histogramEditField.Value;
             options.Transinformation_lag = app.timelagEditField.Value;
             options.Synchronization_bins = app.histogramsynchronizationEditField.Value;
@@ -292,7 +314,7 @@ function out = ck_rc3(varargin)
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % granger causality als extra aufruf
             
-            if str2num(app.grangerSwitch.Value)
+            if app.grangerSwitch.Value
                 
                 GC_options = struct;
                 GC_options.MultiSubjectAnalysis = 1;
@@ -386,64 +408,68 @@ function out = ck_rc3(varargin)
             close(h);
             
 
-        case 'chooseg2dir' %ie: ck_rc3('chooseg2dir', app);
+        case 'chooserootdir' %ie: ck_rc3('chooserootdir', app);
             p = uigetdir('Select  dir for Clusterdata of group 2');
-            app.g2dirEditField.Value = p; 
+            if isempty(p) | p == 0; return; end
+            app.resultsdirEditField.Value = p; 
+            app.g1dirEditField.Value = fullfile(p, 'group_1');
+            app.g2dirEditField.Value = fullfile(p, 'group_2');
 
         case 'GOButton' %ie: ck_rc3('GOButton', app);
             fprintf('go for data import\n');
             options = struct;
             options.extract_all = app.extractallvoxelinClusterCheckBox.Value;
-            options.extract_con1 = app.extractconditionalvoxelCheckBox.Value;
+            options.extract_con1 = app.extractconditionalvoxelCheckBox1.Value;
             options.extract_con1_g1_val = app.graymatterprobgreaterasEditField.Value;
             options.extract_con_g1_name = app.graymatterfilenameEditField.Value;
             options.extract_con1_g2_val = app.whitematterproblessthenEditField.Value;
             options.extract_con_g2_name = app.whitematterfilenameEditField.Value;
             options.extract_con1_g3_val = app.CSFproblessthenEditField.Value;
             options.extract_con_g3_name = app.csffilenameEditField.Value;
-            options.extract_con2 = app.extractconditionalvoxelCheckBox.Value;
+            options.extract_con2 = app.extractconditionalvoxelCheckBox2.Value;
             options.extract_con2_g1_val = app.graymatterprobgreateras2EditField.Value;
             options.extract_con2_g2_val = app.whitematterproblessthen2EditField.Value;
             options.extract_con2_g3_val = app.CSFproblessthen2EditField.Value;
+
+            options.filter_TR = app.TREditField.Value;
+            options.filter_lpf = app.lpfEditField.Value;
+            options.filter_hpf = app.hpfEditField.Value;
             
             
-            %             m1file = get(handles.editmultig1,'String');
-            %             load(m1file);
-            %             Vmg1 = Vm;
-            %             Pmg1 = Pm;
-            %             m2file = get(handles.editmultig2,'String');
-            %             load(m2file);
-            %             Vmg2 = Vm;
-            %             Pmg2 = Pm;
-            %options = ck_rc2_fill_all_clusters_from_niftifiles_options(Vmg1,Pmg1,Vmg2,Pmg2);
-            %options = ck_rc2_fill_all_clusters_from_niftifiles_options();
-            parameterfile = fullfile(app.resultsdirEditField.Value,'parameter.mat');
-            try 
-                load(parameterfile)
-            catch
-                parameter = struct;
-            end
-                
-            %hApp = ck_rc2_fill_all_clusters_from_niftifiles_options;
-            %options = MySetupFunction(hApp, Vmg1,Pmg1,Vmg2,Pmg2,parameterfile);
-            %[Vmg1,Pmg1]=ck_rc2_multisubject_selection();
-            %[Vmg2,Pmg2]=ck_rc2_multisubject_selection();
-            subjectfilelist_g1 = get_full_subjects_filenames(app,app.g1dirdataimportEditField.Value,app.g1dirdataimportListBox.Value);
-            subjectfilelist_g2 = get_full_subjects_filenames(app,app.g2dirdataimportEditField.Value,app.g2dirdataimportListBox.Value);
+            
+            %PREPARE THE FILE LISTS
+
+            val1 = app.g1dirdataimportListBox.Value;
+            val2 = app.g2dirdataimportListBox.Value;
+            if isempty(val1), warndlg('nichts ausgewaehlt'), return; end
+
+            subjectfilelist_g1 = get_full_subjects_filenames(app.g1dirdataimportEditField.Value, val1, app.dataimportsubdirnameEditField_1.Value, app.dataimportfilefilterEditField.Value);
+            subjectfilelist_g2 = get_full_subjects_filenames(app.g1dirdataimportEditField.Value, val2, app.dataimportsubdirnameEditField_2.Value, app.dataimportfilefilterEditField.Value);
+
             resultsdir = app.resultsdirEditField.Value;
             outputdirg1 = app.g1dirEditField.Value;
             outputdirg2 = app.g2dirEditField.Value;
-            namelistg1 = app.g1dirdataimportListBox.Value;
-            namelistg2 = app.g2dirdataimportListBox.Value;
-            assignin('base','subjectfilelist_g1',subjectfilelist_g1);
-            assignin('base','namelistg1',namelistg1);
             
-            ck_rc3_fill_all_clusters_from_niftifiles(resultsdir,outputdirg1,subjectfilelist_g1,namelistg1,options);
-            ck_rc3_fill_all_clusters_from_niftifiles(resultsdir,outputdirg2,subjectfilelist_g2,namelistg2,options);
+        
+            %SAVE THE PARAMETERS
+            parameterfile = fullfile(app.resultsdirEditField.Value,'parameter.mat');
+
             parameter.TR = app.TREditField.Value;
             parameter.lpf = app.lpfEditField.Value;
             parameter.hpf = app.hpfEditField.Value;
             save(parameterfile,'parameter');
+            
+            % LOAD THE DATA TO CLUSTERS
+            if ~isempty(val1)
+                options.trial_id = app.dataimportsubdirnameEditField_1.Value;
+                ck_rc3_fill_all_clusters_from_niftifiles(resultsdir,outputdirg1,subjectfilelist_g1,val1,options);
+            end
+            if ~isempty(val2)
+                options.trial_id = app.dataimportsubdirnameEditField_2.Value;
+                ck_rc3_fill_all_clusters_from_niftifiles(resultsdir,outputdirg2,subjectfilelist_g2,val2,options);
+            end
+        
+
         case 'DefineNetwork' %ie: ck_rc3('DefineNetwork', app);
             ck_rc3_define_network(app.resultsdirEditField.Value);
 
@@ -457,7 +483,20 @@ function out = ck_rc3(varargin)
             
             cd(app.resultsdirEditField.Value);
             
-            sb_roi_cluster_manager();
+            % OPEN SB_ROI_CLUSTER_MANAGER
+            if ~exist(which('sb_roi_cluster_manager.m'))
+                answ = questdlg('Wollen sie den Pfad auswaehlen?', 'sb_roi_cluster_manager nicht gefunden');
+                if ~strcmp(lower(answ), 'yes'), return ; end
+                
+                pn = uigetdir('/opt/sb_tools/')
+                if isempty(pn) | pn==0, return; end
+                addpath(pn);
+            end
+
+            sb_roi_cluster_manager('start_gui', [], app)
+
+
+            % ENDE
             stat = listboxupdate(app);
             cd(d);
 
@@ -985,6 +1024,34 @@ function out = ck_rc3(varargin)
             
             assignin('base','C2C_stat',C2C_stat);
             app.C2CestimatedataLamp.Color = 'green';
+
+        case 'export_results'
+            % CHECK THE EXPORT OPTIONS
+            export_rep = app.export_group_as_rep_measure.Value;
+            export_trial = app.export_group_as_trial.Value;
+            if ~(export_rep | export_trial),warndlg('bitte eine Option auswaehlen!'); return; end
+
+            % CHECK THE EXPORT GROUPS
+            g1_list = app.g1ListBox.Value;
+            g2_list = app.g2ListBox.Value;
+
+            if isempty(g1_list) & isempty(g2_list), warndlg('keine Cluster ausgewaehlt (*Cluster.mat)'); return; end
+
+            % PREPARE DATA
+            cfg = struct;
+            cfg.g1_list = g1_list; 
+            cfg.g2_list = g2_list;
+            cfg.g1_dir = app.g1dirEditField.Value;
+            cfg.g2_dir = app.g2dirEditField.Value;
+            cfg.results_dir = app.resultsdirEditField.Value;
+            if export_rep
+                cfg.method = 'repeated measurements';
+            else
+                cfg.method = 'trials';
+            end
+
+            ck_rc3_export(cfg);
+
         otherwise
             fprintf('ck_rc3: argument %s not found\n', actionstr)
 
@@ -1095,10 +1162,12 @@ function C = del_network(app,C)
     
 end
 
-function cell_list = get_updatedataimport_list(app,rootdir,filter)
+function cell_list = get_updatedataimport_list(rootdir,subdir, file_str)
     %rootdir = 'H:\data_ck\Vesti\data';
     %filter = 'filter_rs6';
     cell_list = {};
+
+    
     dx = dir(rootdir);
     idx = 0;
     %dx2 = dx;
@@ -1108,7 +1177,6 @@ function cell_list = get_updatedataimport_list(app,rootdir,filter)
             dx2(idx)=dx(i);
         end
     end
-    assignin('base','dx2',dx2);
     
     idx = 0;
     for i=1:length(dx2)
@@ -1117,14 +1185,13 @@ function cell_list = get_updatedataimport_list(app,rootdir,filter)
         for j=1:length(dtmp)
             
             if dtmp(j).isdir && ~strcmp(dtmp(j).name,'.') && ~strcmp(dtmp(j).name,'..')
-                
-                if strcmp(dtmp(j).name,filter)
+                if strcmp(dtmp(j).name,subdir)
                     %fprintf('korrektes unterverzeichnis gefunden %.0d %.0d\n',i,j)
                     subdir_exist = 1;
                 end
             end
         end
-        if subdir_exist || isempty(filter)
+        if subdir_exist || isempty(subdir)
             idx = idx + 1;
             rel_subdirs(idx)=dx2(i);
             cell_list{idx} = dx2(i).name;
@@ -1136,11 +1203,11 @@ function cell_list = get_updatedataimport_list(app,rootdir,filter)
     
 end
 
-function file_list = get_full_subjects_filenames(app,path,Items)
+function file_list = get_full_subjects_filenames(path,Items, subdir, filefilter)
     %assignin('base','Items',Items);
     %            length(Items)
-    subdir = app.dataimportsubdirnameEditField.Value;
-    filefilter = app.dataimportfilefilterEditField.Value;
+    file_list = [];
+
     for i=1:length(Items)
         
         tmp = [path filesep Items{i} filesep filefilter];
@@ -1166,17 +1233,15 @@ end
 
 
 
-function error = test_existence(app,rootdir,pathlist)
+function error = test_existence(app, rootdir,pathlist, subdir)
     error = 0;
     for i=1:length(pathlist)
         
-        p = [rootdir filesep pathlist{i} filesep app.dataimportsubdirnameEditField.Value];
-    %                pf = Vm{i}(1,1).fname; 
-    %                [p,f] = fileparts(pf);
+        p = [rootdir filesep pathlist{i} filesep subdir];
 
         e1 = exist(fullfile(p,app.graymatterfilenameEditField.Value));
-        e2 = exist(fullfile(p,app.graymatterfilenameEditField.Value));
-        e3 = exist(fullfile(p,app.graymatterfilenameEditField.Value));
+        e2 = exist(fullfile(p,app.whitematterfilenameEditField.Value));
+        e3 = exist(fullfile(p,app.csffilenameEditField.Value));
        
         if (e1+e2+e3)~=6
             fprintf('no c1-2-3 files were found in folder %s \n',p);
@@ -1686,7 +1751,7 @@ function C = reduce(C,idx,num_subjects)
     f = fields(C);
     for i=1:length(f)
         t = size(C.(f{i}));
-        dims = lenth(t);
+        dims = length(t);
         if isnumeric(C.(f{i})) && t(end)==num_subjects
             if dims== 1
                 C.(f{i})(idx)=[];

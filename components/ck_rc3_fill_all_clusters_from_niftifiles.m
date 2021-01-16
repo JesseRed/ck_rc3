@@ -35,6 +35,8 @@ load(options.cluster_fn); fprintf('|Loading Cluster: %s\n', options.cluster_fn);
 h =  waitbar(0,'Please wait... filling Clusters');
 % Schleife ueber die Probanden
 for i=1:length(Vm)
+    INFO = [];
+    
     waitbar(i/length(Vm));
     cluster_save_name=fullfile(outdir,['Cluster_' Pm{i} '.mat']);
     %data_save_name = fullfile(outdir,['Data_' Pm{i,1} '.mat']);
@@ -61,11 +63,26 @@ for i=1:length(Vm)
     end
     % Schleife ueber die Cluster
     for c=1:size(Cluster,1) %#ok<NODEF,USENS>
+        if isempty(INFO)
+            INFO.filter.TR = options.filter_TR;
+            INFO.filter.lpf = options.filter_lpf;
+            INFO.filter.hpf = options.filter_hpf;
+            INFO.trial_id = options.trial_id;
+            [INFO.subject_pn bb cc] = fileparts(Vm{i}(1,:));
+            json_fn = fullfile(INFO.subject_pn, 'meta.json');
+            if exist(json_fn)
+                INFO.meta = sb_gen_read_jsonfile(json_fn);
+                INFO.series_id = INFO.meta.series_id;
+            else
+                INFO.meta = [];
+            end
+        end
         jc = 0;
         % zaehler fuer den conditional Cluster
         jcc1 = 0;
         jcc2 = 0;
         num_vox = size(Cluster{c,1}.XYZ,2);
+        Cluster{c,1}.info = INFO; %added by SB 20210112
         Yall = zeros(size(Y,4),num_vox); %#ok<AGROW>
         Yc1 = zeros(size(Y,4),num_vox); %#ok<AGROW>
         Yc2 = zeros(size(Y,4),num_vox); %#ok<AGROW>

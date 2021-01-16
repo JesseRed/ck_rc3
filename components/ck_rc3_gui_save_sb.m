@@ -13,7 +13,7 @@ fprintf('ck_rc3_gui_save_sb\n')
     
     fprintf('\ndone\n\n');
     
-    fields2save = {'resultsdirEditField', 'g1dirEditField', 'g2dirEditField', 'exemplarydatafileEditField',  'g1ListBox', 'g2ListBox', 'g1dirdataimportEditField', 'g1dirdataimportListBox', 'g2dirdataimportEditField', 'g2dirdataimportListBox', 'dataimportsubdirnameEditField', 'dataimportfilefilterEditField', 'TREditField', 'lpfEditField', 'hpfEditField', 'graymatterfilenameEditField', 'whitematterfilenameEditField', 'csffilenameEditField', 'newprefixforClustermatfilesEditField', 'C2Cgroup1ListBox', 'C2Cgroup2ListBox', 'xlscsvFileEditField', 'ExelvariablesListBox'};
+    fields2save = {'resultsdirEditField', 'g1dirEditField', 'g2dirEditField', 'exemplarydatafileEditField',  'g1ListBox', 'g2ListBox', 'g1dirdataimportEditField', 'g1dirdataimportListBox', 'g2dirdataimportListBox', 'dataimportsubdirnameEditField_1', 'dataimportsubdirnameEditField_2', 'dataimportfilefilterEditField', 'TREditField', 'lpfEditField', 'hpfEditField', 'graymatterfilenameEditField', 'whitematterfilenameEditField', 'csffilenameEditField', 'newprefixforClustermatfilesEditField', 'C2Cgroup1ListBox', 'C2Cgroup2ListBox', 'xlscsvFileEditField', 'ExelvariablesListBox', 'TREditField', 'lpfEditField', 'hpfEditField'};
     
     OUT = struct();
     for i = 1:numel(fields2save)
