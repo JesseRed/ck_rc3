@@ -55,7 +55,9 @@ function out = ck_rc3(varargin)
             listg1 = get_updatedataimport_list(data_dir,subdir_1, filter_str);
             listg2 = get_updatedataimport_list(data_dir,subdir_2, filter_str);
             app.g1dirdataimportListBox.Items = listg1;
+            app.g1dirdataimportListBox.Value = listg1;
             app.g2dirdataimportListBox.Items = listg2;
+            app.g2dirdataimportListBox.Value = listg2;
 
             %if successfull try to import a meta.json as well
             if isempty(listg1), return; end
@@ -1067,8 +1069,8 @@ function stat = listboxupdate(app)
     
 
     
-    g1 = dir([app.g1dirEditField.Value filesep '*.mat']);
-    g2 = dir([app.g2dirEditField.Value filesep '*.mat']);
+    g1 = dir([app.g1dirEditField.Value filesep 'Cluster_*.mat']);
+    g2 = dir([app.g2dirEditField.Value filesep 'Cluster_*.mat']);
     
     listg1{1}='empty';
     idxg1 = 1;
@@ -1083,8 +1085,8 @@ function stat = listboxupdate(app)
     for i=1:size(g2,1)
         listg2{i} = g2(i,1).name;
     end
-    app.g1ListBox.Items=listg1;
-    app.g2ListBox.Items=listg2;
+    app.g1ListBox.Items=listg1; app.g1ListBox.Value = app.g1ListBox.Items;
+    app.g2ListBox.Items=listg2; app.g2ListBox.Value = app.g2ListBox.Items;
     
     % if idxg1>1
     %     set(handles.listboxg1,'Value',Valg1);
